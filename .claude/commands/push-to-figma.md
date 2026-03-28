@@ -23,3 +23,55 @@ Requires: Figma MCP server connected, Figma file URL in CLAUDE.md
 - Always load figma-use skill before calling use_figma
 - If the Figma file URL is not in CLAUDE.md, ask for it before proceeding
 - Prefer creating variables over hardcoded fills
+
+## Auto-layout sizing — hug vs fixed
+
+Getting "hug contents" right requires three things to all be correct at once. Missing any one of them leaves the frame with a fixed height.
+
+### 1. Call `resize()` before setting sizing modes — never after
+
+`resize()` resets both axes to `FIXED`. Set your desired sizing mode **after** the resize call:
+
+```js
+// WRONG — resize overrides the AUTO you just set
+frame.primaryAxisSizingMode = 'AUTO';
+frame.resize(280, 10); // ← resets height back to FIXED
+
+// CORRECT — set AUTO after resize
+frame.resize(280, 10);
+frame.primaryAxisSizingMode = 'AUTO'; // height now hugs
+frame.counterAxisSizingMode = 'FIXED'; // width stays 280
+```
+
+### 2. Set both axes explicitly on every frame
+
+Figma defaults to `FIXED` on both axes. Always declare what you want:
+
+| Intent | primaryAxisSizingMode | counterAxisSizingMode |
+|--------|----------------------|-----------------------|
+| Hug width and height | `AUTO` | `AUTO` |
+| Fixed width, hug height (e.g. cards, inputs) | `AUTO` | `FIXED` (+ call resize for width first) |
+| Fill parent on one axis | set on child via `layoutSizingHorizontal/Vertical` | — |
+
+### 3. Set `layoutSizingHorizontal/Vertical` on every direct child
+
+Children inside auto-layout frames don't fill their parent by default. Forgetting this is what makes auto-layout parents shrink-wrap to the wrong size:
+
+```js
+// Text that should span the full width of its parent:
+parent.appendChild(textNode);
+textNode.layoutSizingHorizontal = 'FILL'; // must be set AFTER appendChild
+
+// Inner frame that should fill parent width:
+parent.appendChild(innerFrame);
+innerFrame.layoutSizingHorizontal = 'FILL'; // same rule
+```
+
+`'FILL'` and `'HUG'` can only be set **after** the node is appended to an auto-layout parent — setting them before throws.
+
+### Checklist before finishing any component
+
+- [ ] No frame has `resize()` called after its sizing mode was set to `AUTO`
+- [ ] Every direct child of an auto-layout frame has explicit `layoutSizingHorizontal` and `layoutSizingVertical`
+- [ ] Text nodes that should span the full width have `layoutSizingHorizontal = 'FILL'`
+- [ ] After `combineAsVariants`, children are repositioned manually (they stack at 0,0 with FIXED sizes)
