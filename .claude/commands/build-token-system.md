@@ -1,6 +1,6 @@
 Convert raw extracted tokens into a structured design token system with proper naming conventions and light/dark modes.
 
-Reads from: `tokens/system/raw.json`
+Reads from: `tokens/raw.json`
 Writes to: `tokens/system/` directory
 
 ## Architecture
@@ -9,6 +9,7 @@ Three-tier system:
 
 **Tier 1 — Primitives** (`tokens/system/primitives.json`)
 Named raw values. No semantic meaning. Source of truth.
+
 - If `raw.json` has named palettes (e.g. `arctic`, `indigo`) → mirror those names directly into primitives.
 - If `raw.json` has only unnamed hex values → assign the closest standard scale step (50/100/.../900).
 - Include typography, spacing, radius, and shadow as separate top-level keys.
@@ -20,16 +21,25 @@ Reference primitives via `{color.name.step}` syntax. Carry meaning. Define light
 {
   "color": {
     "background": {
-      "default":  { "light": "{color.neutral.0}",   "dark": "{color.neutral.950}" },
-      "subtle":   { "light": "{color.neutral.50}",  "dark": "{color.neutral.900}" }
+      "default": {
+        "light": "{color.neutral.0}",
+        "dark": "{color.neutral.950}"
+      },
+      "subtle": { "light": "{color.neutral.50}", "dark": "{color.neutral.900}" }
     },
     "text": {
-      "default":  { "light": "{color.neutral.900}", "dark": "{color.neutral.50}" },
-      "muted":    { "light": "{color.neutral.500}", "dark": "{color.neutral.400}" }
+      "default": {
+        "light": "{color.neutral.900}",
+        "dark": "{color.neutral.50}"
+      },
+      "muted": { "light": "{color.neutral.500}", "dark": "{color.neutral.400}" }
     },
     "interactive": {
-      "primary":       { "light": "{color.brand.500}", "dark": "{color.brand.700}" },
-      "primary-hover": { "light": "{color.brand.400}", "dark": "{color.brand.400}" }
+      "primary": { "light": "{color.brand.500}", "dark": "{color.brand.700}" },
+      "primary-hover": {
+        "light": "{color.brand.400}",
+        "dark": "{color.brand.400}"
+      }
     }
   }
 }
@@ -39,7 +49,7 @@ Reference primitives via `{color.name.step}` syntax. Carry meaning. Define light
 
 ## Steps
 
-1. Read `tokens/system/raw.json`
+1. Read `tokens/raw.json`
 2. Build `tokens/system/primitives.json` — named palette + typography + spacing + radius + shadow
 3. Infer semantic roles from usage context in `raw.json` (check `components`, `modes`, `tailwindMapped`) or from perceptual lightness:
    - Very light → background/surface candidates
@@ -54,7 +64,7 @@ Reference primitives via `{color.name.step}` syntax. Carry meaning. Define light
    - Resolve each token's dark value to its primitive hex.
    - For each `text.*` token, identify which `background.*` it is intended to sit on (e.g. `text-on-brand` → `background-brand` or `background-brand-subtle`).
    - If the background resolves to a dark hex, the text must resolve to a light hex — and vice versa. Flag any pair where both are dark or both are light.
-   - Fix flagged tokens before writing output. A token name like `text-on-brand` encodes *context*, not appearance; its dark-mode value must flip when the surface it sits on flips.
+   - Fix flagged tokens before writing output. A token name like `text-on-brand` encodes _context_, not appearance; its dark-mode value must flip when the surface it sits on flips.
 7. Update `docs/token-conventions.md` with palette tables, semantic token reference, and a decisions/rationale section.
 8. Print a summary table of all semantic tokens with their light/dark resolved hex values.
 

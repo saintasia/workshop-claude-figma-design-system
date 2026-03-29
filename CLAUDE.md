@@ -13,12 +13,12 @@ Extract design tokens from a live webpage, build a structured token system with 
 
 ## Commands
 
-| Command                | What it does                                                          |
-| ---------------------- | --------------------------------------------------------------------- |
-| `/extract-tokens`      | Scrape a URL and output raw design tokens to `tokens/system/raw.json` |
-| `/build-token-system`  | Convert raw tokens into a structured system with naming and modes     |
-| `/generate-components` | Scaffold React components from the token system                       |
-| `/push-to-figma`       | Publish tokens and components to the connected Figma file             |
+| Command                | What it does                                                      |
+| ---------------------- | ----------------------------------------------------------------- |
+| `/extract-tokens`      | Scrape a URL and output raw design tokens to `tokens/raw.json`    |
+| `/build-token-system`  | Convert raw tokens into a structured system with naming and modes |
+| `/generate-components` | Scaffold React components from the token system                   |
+| `/push-to-figma`       | Publish tokens and components to the connected Figma file         |
 
 ## Stack
 
